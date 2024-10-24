@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "128995635604",
+    "project_id": "home-visit-d26b1",
+    "storage_bucket": "home-visit-d26b1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:128995635604:android:a473823650ece4709f1f81",
+        "android_client_info": {
+          "package_name": "com.iso.home_visit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeuuVGgZ3guHiXlcPO_udRAe8_m-9W3IE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
