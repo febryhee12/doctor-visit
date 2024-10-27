@@ -15,6 +15,7 @@ class AuthController extends GetxController with BaseController {
   GetStorage box = GetStorage();
 
   var hidden = true.obs;
+  var isButtonEnabled = false.obs;
   final isTextFieldUserEmpty = true.obs;
   final isTextFieldPassEmpty = true.obs;
 
@@ -24,8 +25,12 @@ class AuthController extends GetxController with BaseController {
   @override
   void onInit() {
     super.onInit();
-    username = TextEditingController(text: '');
+    String? savedUsername = box.read('save_username');
+    username = TextEditingController(text: savedUsername ?? '');
     password = TextEditingController(text: '');
+
+    username.addListener(_checkButtonState);
+    password.addListener(_checkButtonState);
   }
 
   @override
@@ -35,13 +40,19 @@ class AuthController extends GetxController with BaseController {
     super.dispose();
   }
 
-  void onTextChangedUsername(String value) {
-    isTextFieldUserEmpty.value = value.isEmpty;
+  void _checkButtonState() {
+    // Cek apakah username dan password sudah diisi
+    isButtonEnabled.value =
+        username.text.isNotEmpty && password.text.isNotEmpty;
   }
 
-  void onTextChangedPassword(String value) {
-    isTextFieldPassEmpty.value = value.isEmpty;
-  }
+  // void onTextChangedUsername(String value) {
+  //   isTextFieldUserEmpty.value = value.isEmpty;
+  // }
+
+  // void onTextChangedPassword(String value) {
+  //   isTextFieldPassEmpty.value = value.isEmpty;
+  // }
 
   Future<void> auth() async {
     DialogHelper2.showLoading();
@@ -52,26 +63,23 @@ class AuthController extends GetxController with BaseController {
     }).catchError(handleError);
 
     if (response == null) return;
-
     var data = await json.decode(response);
-
+    DialogHelper2.hideLoading();
     if (data['status'] == 'Success') {
-      DialogHelper2.hideLoading();
       try {
         var token = data['data']['token'].toString();
-
         await authAccess(token);
       } catch (e) {
         throw Exception(e.toString());
       }
     } else if (data['status'] == 'Error') {
-      DialogHelper2.hideLoading();
       Get.snackbar('Maaf', 'Username atau password salah');
     }
     DialogHelper2.hideLoading();
   }
 
   Future<void> authAccess(String token) async {
+    await box.write('save_username', username.text);
     await box.write("auth_token", token);
     await Get.offAllNamed(
       utility.RouteName.listOrder,

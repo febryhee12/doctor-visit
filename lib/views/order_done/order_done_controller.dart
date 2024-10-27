@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import '../../controller/background_active_location.dart';
 import '../../routes/route_name.dart' as utility;
 
 class OrderDoneController extends GetxController {
@@ -12,6 +13,7 @@ class OrderDoneController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    stopBackgroundService();
     _clearPreviousData();
     _toListOrder();
   }
@@ -49,10 +51,10 @@ class OrderDoneController extends GetxController {
       const Duration(milliseconds: 100),
       (timer) {
         count++;
-        if (count > 6) {
+        if (count > 13) {
           timer.cancel();
           Future.delayed(Duration.zero, () {
-            Get.offAndToNamed(utility.RouteName.listOrder);
+            Get.offAllNamed(utility.RouteName.listOrder);
           });
         }
       },

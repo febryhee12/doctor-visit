@@ -56,7 +56,7 @@ class CustomFormField {
     BorderRadius borderRadius_;
     borderRadius != null
         ? borderRadius_ = BorderRadius.circular(borderRadius)
-        : borderRadius_ = BorderRadius.circular(5.0);
+        : borderRadius_ = BorderRadius.circular(50.0);
     //
     return TextFormField(
       textCapitalization: TextCapitalization.none,

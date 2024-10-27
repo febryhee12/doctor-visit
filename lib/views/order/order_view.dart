@@ -23,16 +23,22 @@ class OrderView extends GetView<OrderController> {
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        backgroundColor: HVColors.highlight,
+        backgroundColor: HVColors.flashWhite,
         appBar: AppBar(
+          scrolledUnderElevation: 0,
           backgroundColor: Colors.white,
-          title: const Text('Data Rekam Medis'),
+          title: const Text(
+            'Input Rekam Medis',
+            style: TextStyle(fontSize: 16),
+          ),
         ),
         body: Obx(
           () {
             if (controller.isLoading.value == true) {
               return const Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  color: HVColors.primary,
+                ),
               );
             } else {
               return body(context);
@@ -103,28 +109,33 @@ class OrderView extends GetView<OrderController> {
                           diagnosa(patientIndex, context),
                           //diagnosa
                           SizedBox(
-                            height: 1.5.h,
+                            height: 3.h,
                           ),
                           //obat
-                          ElevatedButton(
-                            onPressed: () {
-                              controller
-                                  .showDropdown(patient.id!); // Show dropdown
-                            },
-                            style: ElevatedButton.styleFrom(
-                              elevation: 0,
-                              backgroundColor: HVColors.primary,
+                          Center(
+                            child: SizedBox(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  controller.showDropdown(
+                                      patient.id!); // Show dropdown
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  elevation: 0,
+                                  backgroundColor: HVColors.primary,
+                                ),
+                                child: Obx(() => Text(
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                      controller.showDropdownForPatient[
+                                                  patient.id!] ==
+                                              true
+                                          ? 'Sembunyikan'
+                                          : 'Tambah Obat',
+                                    )),
+                              ),
                             ),
-                            child: Obx(() => Text(
-                                  style: const TextStyle(color: Colors.white),
-                                  controller.showDropdownForPatient[
-                                              patient.id!] ==
-                                          true
-                                      ? 'Sembunyikan'
-                                      : 'Tambah Obat',
-                                )),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 15),
                           Obx(() {
                             if (controller.showDropdownForPatient[patient.id] ==
                                 true) {
@@ -208,37 +219,45 @@ class OrderView extends GetView<OrderController> {
                               itemBuilder: (context, index) {
                                 final SelectedMedicine medicine =
                                     medicines[index];
-                                return ListTile(
-                                  title: Text(
-                                    medicine.obat!.name!,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                        color: HVColors.primary),
-                                  ),
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(height: 0.5.h),
-                                      Text('Jumlah: ${medicine.jumlah}'),
-                                      SizedBox(height: 0.5.h),
-                                      Text(
-                                          'Aturan Pakai: ${medicine.aturanPakai}'),
-                                      SizedBox(height: 0.5.h),
-                                      Text(
-                                          'Keterangan: ${medicine.keterangan}'),
-                                    ],
-                                  ),
-                                  trailing: IconButton(
-                                    icon: Icon(
-                                      Icons.delete,
-                                      color: Colors.red[400],
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 10),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                          width: 1, color: HVColors.greybg)),
+                                  child: ListTile(
+                                    title: Text(
+                                      medicine.obat!.name!,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                          color: HVColors.primary),
                                     ),
-                                    onPressed: () {
-                                      controller.removeMedicineFromPatient(
-                                          patient.id!, medicine.obat!);
-                                    },
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(height: 0.5.h),
+                                        Text('Jumlah: ${medicine.jumlah}'),
+                                        SizedBox(height: 0.5.h),
+                                        Text(
+                                            'Aturan Pakai: ${medicine.aturanPakai}'),
+                                        SizedBox(height: 0.5.h),
+                                        Text(
+                                            'Keterangan: ${medicine.keterangan}'),
+                                      ],
+                                    ),
+                                    trailing: IconButton(
+                                      iconSize: 24,
+                                      icon: const Icon(
+                                        Icons.cancel,
+                                        color: HVColors.alzarin,
+                                      ),
+                                      onPressed: () {
+                                        controller.removeMedicineFromPatient(
+                                            patient.id!, medicine.obat!);
+                                      },
+                                    ),
                                   ),
                                 );
                               },
@@ -259,7 +278,7 @@ class OrderView extends GetView<OrderController> {
                 alignment: Alignment.bottomCenter,
                 child: Container(
                   padding: EdgeInsets.all(2.h),
-                  decoration: const BoxDecoration(color: Colors.white),
+                  decoration: const BoxDecoration(color: HVColors.flashWhite),
                   child: buttonSubmit(),
                 ),
               ),
@@ -277,7 +296,7 @@ class OrderView extends GetView<OrderController> {
         TypeAheadField<DiagnosisTagModel>(
           builder: (context, textcontroller, focusNode) {
             return CustomFormField().field(
-              question: "Diagnosa",
+              question: "Input Diagnosa",
               controller: textcontroller,
               focusNode: focusNode,
               canBeNull: false,
@@ -344,23 +363,14 @@ class OrderView extends GetView<OrderController> {
   buttonSubmit() {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
+      height: 54,
+      child: TextBtn().button(
         onPressed: () {
           bottomSheetMenu();
-          // Handle button press
         },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.teal,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-        ),
-        child: const Text(
-          'Upload',
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
+        backgroundColor: HVColors.primary,
+        textStyle: const TextStyle(color: Colors.white),
+        label: 'Submit',
       ),
     );
   }
@@ -369,24 +379,28 @@ class OrderView extends GetView<OrderController> {
     return Get.bottomSheet(
       Wrap(
         children: [
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 2.h),
-            color: Colors.white,
-            child: Center(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(
-                        right: 2.h, left: 2.h, top: 2.h, bottom: 2.5.h),
-                    child: const Text(
-                      'Apakah Anda yakin data rekam medis yang telah diisi sudah benar dan lengkap?\n\nSetelah disimpan, data ini tidak dapat diubah.',
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(8), topRight: Radius.circular(8)),
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 2.h),
+              color: Colors.white,
+              child: Center(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(
+                          right: 2.h, left: 2.h, top: 2.h, bottom: 2.5.h),
+                      child: const Text(
+                        'Apakah anda yakin data rekam medis yang telah diisi sudah benar dan lengkap?\n\nSetelah disimpan, data ini tidak dapat diubah.',
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 2.h),
-                    child: buttonConfirmationLogout(),
-                  ),
-                ],
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 2.h),
+                      child: buttonConfirmationLogout(),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -470,46 +484,51 @@ class OrderView extends GetView<OrderController> {
 
   bottomSheetDetail(Pasiens patien) {
     return Get.bottomSheet(
-      ClipRRect(
-        borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(8), topRight: Radius.circular(8)),
-        child: Container(
-          height: 45.h,
-          width: Layout.width,
-          padding: EdgeInsets.all(2.h),
-          color: Colors.white,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(100),
-                  child: Container(
-                    width: 50,
-                    height: 5,
-                    color: Colors.black45,
+      Wrap(
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(8), topRight: Radius.circular(8)),
+            child: Container(
+              width: Layout.width,
+              padding: EdgeInsets.all(2.h),
+              color: Colors.white,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(100),
+                      child: Container(
+                        width: 50,
+                        height: 5,
+                        color: Colors.black45,
+                      ),
+                    ),
                   ),
-                ),
+                  SizedBox(
+                    height: 4.h,
+                  ),
+                  desc(
+                      label: 'Nama Pasien',
+                      desc: '${patien.nama}'.toUpperCase()),
+                  SizedBox(height: 1.5.h),
+                  desc(label: 'Tanggal Lahir', desc: '${patien.tglLahir}'),
+                  SizedBox(height: 1.5.h),
+                  desc(label: 'Gender', desc: '${patien.gender}'),
+                  SizedBox(height: 1.5.h),
+                  desc(label: 'Berat Badan', desc: '${patien.beratBadan} KG'),
+                  SizedBox(height: 1.5.h),
+                  desc(label: 'Tinggi Badan', desc: '${patien.tinggiBadan} CM'),
+                  SizedBox(height: 2.h),
+                  desc2(label: 'Alergi', desc: '${patien.alergi}'),
+                  SizedBox(height: 2.h),
+                  desc2(label: 'Keluhan', desc: '${patien.keluhan}'),
+                ],
               ),
-              SizedBox(
-                height: 4.h,
-              ),
-              desc(label: 'Nama Pasien', desc: '${patien.nama}'.toUpperCase()),
-              SizedBox(height: 1.h),
-              desc(label: 'Tanggal Lahir', desc: '${patien.tglLahir}'),
-              SizedBox(height: 1.h),
-              desc(label: 'Gender', desc: '${patien.gender}'),
-              SizedBox(height: 1.h),
-              desc(label: 'Berat Badan', desc: '${patien.beratBadan} KG'),
-              SizedBox(height: 1.h),
-              desc(label: 'Tinggi Badan', desc: '${patien.tinggiBadan} CM'),
-              SizedBox(height: 2.h),
-              desc2(label: 'Alergi', desc: '${patien.alergi}'),
-              SizedBox(height: 2.h),
-              desc2(label: 'Keluhan', desc: '${patien.keluhan}'),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

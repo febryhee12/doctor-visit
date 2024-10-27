@@ -11,7 +11,7 @@ class TextBtn {
     EdgeInsetsGeometry? padding =
         const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
     BorderRadiusGeometry? borderRadius =
-        const BorderRadius.all(Radius.circular(5)),
+        const BorderRadius.all(Radius.circular(50)),
     Widget icon = const SizedBox(
       height: 0,
     ),

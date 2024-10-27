@@ -67,7 +67,7 @@ class AuthView extends GetView<AuthController> {
       question: "Username",
       canBeNull: false,
       obscureText: false,
-      onChanged: controller.onTextChangedUsername,
+      onChanged: (value) => controller.username.text = value,
       controller: controller.username,
       keyboardType: TextInputType.name,
       inputFormatters: <TextInputFormatter>[
@@ -82,7 +82,7 @@ class AuthView extends GetView<AuthController> {
       question: "Password",
       canBeNull: false,
       obscureText: controller.hidden.value,
-      onChanged: controller.onTextChangedPassword,
+      onChanged: (value) => controller.password.text = value,
       controller: controller.password,
       inputFormatters: <TextInputFormatter>[
         FilteringTextInputFormatter.deny(RegExp('[ ]')),
@@ -92,6 +92,7 @@ class AuthView extends GetView<AuthController> {
         icon: controller.hidden.value == false
             ? const Icon(
                 Iconsax.eye,
+                color: HVColors.primary,
               )
             : const Icon(
                 Iconsax.eye_slash,
@@ -103,25 +104,16 @@ class AuthView extends GetView<AuthController> {
   buttonLogin() {
     return TextBtn().button(
       width: Layout.width,
-      onPressed: () {
-        if (controller.isTextFieldUserEmpty.value ||
-            controller.isTextFieldPassEmpty.value) {
-          null;
-        } else {
-          controller.auth();
-        }
-      },
+      onPressed:
+          controller.isButtonEnabled.value ? () => controller.auth() : null,
       label: "Masuk",
-      backgroundColor: controller.isTextFieldUserEmpty.value ||
-              controller.isTextFieldPassEmpty.value
-          ? HVColors.grey_300
-          : HVColors.primary,
+      backgroundColor: controller.isButtonEnabled.value
+          ? HVColors.primary
+          : HVColors.grey_300,
       textStyle: TextStyle(
-          fontSize: 12.sp,
-          color: controller.isTextFieldUserEmpty.value ||
-                  controller.isTextFieldPassEmpty.value
-              ? Colors.black26
-              : Colors.white),
+        fontSize: 12.sp,
+        color: controller.isButtonEnabled.value ? Colors.white : Colors.black26,
+      ),
     );
   }
 }

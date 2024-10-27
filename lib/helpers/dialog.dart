@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:home_visit/styles/color.dart';
 
 class DialogHelper2 {
   static void showLoading() {
@@ -7,7 +8,9 @@ class DialogHelper2 {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Get.dialog(
         const Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(
+            color: HVColors.primary,
+          ),
         ),
         barrierDismissible: false,
       );

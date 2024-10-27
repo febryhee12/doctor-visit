@@ -1,16 +1,17 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../controller/location_permission.dart';
 import '../../controller/notification_permission.dart';
 import '../../routes/route_name.dart' as utility;
 
-class SplashController extends GetxController with WidgetsBindingObserver {
+class SplashController extends GetxController {
   GetStorage box = GetStorage();
   var token = ''.obs;
   var count = 0;
+  var version = ''.obs;
 
   @override
   void onInit() {
@@ -21,7 +22,14 @@ class SplashController extends GetxController with WidgetsBindingObserver {
     } else {
       // print('No token found');
     }
+    getVersion();
     checkAndRequestPermissions();
+  }
+
+  Future<void> getVersion() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    version.value = packageInfo.version;
+    box.write('version', version.value);
   }
 
   Future<void> checkAndRequestPermissions() async {

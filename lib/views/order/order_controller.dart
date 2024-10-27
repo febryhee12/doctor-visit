@@ -55,6 +55,7 @@ class OrderController extends GetxController with BaseController {
     token.value = box.read('auth_token');
     fetchListOrder();
     fetchListPasien();
+    // loadDiagnosisFromStorage();
   }
 
   @override
@@ -122,6 +123,7 @@ class OrderController extends GetxController with BaseController {
     if (!tags.any((tag) => tag.id == selectedTag.id)) {
       tags.add(selectedTag);
       selectedDiagnosisMap[patientId] = tags;
+      // saveDiagnosisToStorage();
       update();
       // print(
       //     "Added tag ${selectedTag.nmDiag} to patient $patientId, tags now: ${tags.map((e) => e.nmDiag)}");
@@ -133,8 +135,28 @@ class OrderController extends GetxController with BaseController {
     tags.removeWhere((tag) => tag.id == tagToRemove.id);
     selectedDiagnosisMap[patientId] =
         tags; // This is just re-assigning the modified list back to the map
+
+    // saveDiagnosisToStorage();
     update(); // Trigger UI update
   }
+
+  // void saveDiagnosisToStorage() {
+  //   final data = selectedDiagnosisMap.map((key, value) => MapEntry(
+  //         key.toString(),
+  //         value.map((e) => e.toJson()).toList(),
+  //       ));
+  //   box.write('diagnosisData', data);
+  // }
+
+  // void loadDiagnosisFromStorage() {
+  //   final data = box.read<Map<String, dynamic>>('diagnosisData') ?? {};
+  //   selectedDiagnosisMap.clear();
+  //   data.forEach((key, value) {
+  //     selectedDiagnosisMap[int.parse(key)] =
+  //         (value as List).map((e) => DiagnosisTagModel.fromJson(e)).toList();
+  //   });
+  //   update();
+  // }
 
   //obat
   // Function to add selected medicine to a patient
@@ -194,19 +216,18 @@ class OrderController extends GetxController with BaseController {
         List.from(patientSelectedMedicines[patientId]!);
   }
 
+  // Menambah input obat baru
+  void selectObat(ObatModel? obat) {
+    selectedMedicines.value = obat;
+    removeFocus();
+  }
+
   // Function to show dropdown for a specific patient
   void showDropdown(int patientId) {
     if (showDropdownForPatient[patientId] == null) {
       showDropdownForPatient[patientId] = false;
     }
     showDropdownForPatient[patientId] = !showDropdownForPatient[patientId]!;
-  }
-
-  // Menambah input obat baru
-
-  void selectObat(ObatModel? obat) {
-    selectedMedicines.value = obat;
-    removeFocus();
   }
 
   //API
@@ -366,13 +387,13 @@ class OrderController extends GetxController with BaseController {
     // Validasi: Cek apakah semua pasien memiliki diagnosis
     bool allPatientsHaveDiagnoses = payload["pasiens"]!.every((patient) {
       var diagnosaList = patient['diagnosa'] as List<dynamic>;
-      return diagnosaList.isNotEmpty; // Validasi jika diagnosis diisi
+      return diagnosaList.isNotEmpty;
     });
 
     if (!allPatientsHaveDiagnoses) {
       hideLoading();
       Get.snackbar('Peringatan', 'Diagnosis wajib diisi untuk setiap pasien.');
-      return; // Hentikan eksekusi jika validasi gagal
+      return;
     }
 
     try {
@@ -394,7 +415,8 @@ class OrderController extends GetxController with BaseController {
       final responseData = jsonDecode(response);
       hideLoading();
       if (responseData['status'] == 'Success') {
-        Get.offAndToNamed(utility.RouteName.orderDone);
+        Get.back();
+        await Get.offAndToNamed(utility.RouteName.orderDone);
       }
     } catch (e) {
       Get.snackbar('Error', e.toString());
@@ -418,27 +440,4 @@ class OrderController extends GetxController with BaseController {
   //   // Handle error
   //   throw Exception('Failed to submit data: ${response.body}');
   // }
-}
-
-void showDialog() {
-  Get.defaultDialog(
-    title: "Data Obat Gagal diload",
-    content: const Column(
-      children: [
-        Text("This is a simple GetX dialog."),
-        SizedBox(height: 10),
-        Text("You can customize it as you like."),
-      ],
-    ),
-    textConfirm: "Confirm",
-    textCancel: "Cancel",
-    onConfirm: () {
-      Get.back(); // Close the dialog
-      Get.snackbar("Confirmation", "You clicked Confirm");
-    },
-    onCancel: () {
-      Get.back(); // Close the dialog
-      Get.snackbar("Cancelled", "You clicked Cancel");
-    },
-  );
 }

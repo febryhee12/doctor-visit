@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_storage/get_storage.dart';
-
-import 'management_controller.dart';
+import 'package:home_visit/controller/management_controller.dart';
 
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
@@ -13,6 +12,9 @@ Future<void> initializeService() async {
     androidConfiguration: AndroidConfiguration(
       onStart: onStart,
       isForegroundMode: true,
+      initialNotificationTitle: 'Lokasi',
+      initialNotificationContent:
+          'Dokter dalam perjalanan menuju lokasi pasien',
       autoStart: false,
     ),
     iosConfiguration: IosConfiguration(
@@ -22,17 +24,28 @@ Future<void> initializeService() async {
   );
 }
 
+@pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   final storage = GetStorage();
-  storage.write('serviceRunning', true); // Simpan status service
 
   if (service is AndroidServiceInstance) {
-    // Set foreground notification dengan informasi kustom
-    service.setForegroundNotificationInfo(
-      title: "Lokasi",
-      content: "Dokter dalam perjalanan menuju lokasi pasien",
-    );
+    if (await service.isForegroundService()) {
+      service.setForegroundNotificationInfo(
+        title: "Lokasi",
+        content: "Dokter dalam perjalanan menuju lokasi pasien",
+      );
+    }
+
+    service.on('setAsForeground').listen((event) {
+      service.setAsForegroundService();
+    });
+
+    service.on('setAsBackground').listen((event) {
+      service.setAsBackgroundService();
+    });
   }
+
+  storage.write('serviceRunning', true); // Simpan status service
 
   // Handler untuk menghentikan service
   service.on('stopService').listen((event) async {
@@ -78,7 +91,6 @@ void startBackgroundService() async {
     await FlutterBackgroundService().startService();
     // Get.snackbar('Service Started', 'Background service has started.');
   } else {
-    return;
     // Get.snackbar('Service Running', 'Service is already running.');
   }
 }
@@ -90,7 +102,6 @@ void stopBackgroundService() async {
     FlutterBackgroundService().invoke('stopService');
     // Get.snackbar('Service Stopped', 'Background service has been stopped.');
   } else {
-    return;
     // Get.snackbar('Service Not Running', 'The service is not running.');
   }
 }

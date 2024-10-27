@@ -21,14 +21,6 @@ import '/routes/route.dart' as utility;
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
-// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-//   await Firebase.initializeApp();
-//   // print('Handling a background message: ${message.messageId}');
-//   if (message.notification != null) {
-//     showNotification(message);
-//   }
-// }
-
 void main() async {
   // Inisialisasi GetStorage
   await GetStorage.init();
@@ -59,7 +51,8 @@ void main() async {
   );
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    if (message.notification!.body == 'switch_doctor') {
+    if (message.notification!.body == 'switch_doctor' ||
+        message.notification!.body == 'switch_doctor') {
       // Skip showing notification
       flutterLocalNotificationsPlugin.cancelAll();
       listOrderController.listOrder.clear();
