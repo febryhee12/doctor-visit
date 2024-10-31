@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:home_visit/views/detail_order/detail_order_controller.dart';
 import 'package:home_visit/widgets/text_lbl.dart';
+import 'package:intl/intl.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../styles/color.dart';
+import '../../widgets/text_btn.dart';
 
 class DetailOrderView extends GetView<DetailOrderController> {
   const DetailOrderView({super.key});
@@ -23,6 +25,7 @@ class DetailOrderView extends GetView<DetailOrderController> {
       ),
       body: SingleChildScrollView(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
@@ -63,7 +66,10 @@ class DetailOrderView extends GetView<DetailOrderController> {
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 2.h),
                     child: TextLbl().label(
-                      data: '${controller.listOrder[0].phone}',
+                      data: controller.listOrder[0].status ==
+                              'Menunggu Dokter Approval'
+                          ? '-'
+                          : '${controller.listOrder[0].phone}',
                       textStyle: const TextStyle(fontSize: 14),
                     ),
                   ),
@@ -136,6 +142,57 @@ class DetailOrderView extends GetView<DetailOrderController> {
                   const Divider(height: 30),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 2.h),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextLbl().label(
+                                data: 'Kota',
+                                textStyle:
+                                    const TextStyle(color: Colors.black54),
+                              ),
+                              const SizedBox(height: 3),
+                              Obx(
+                                () {
+                                  return TextLbl().label(
+                                    data: controller.cityText.value,
+                                    textStyle: const TextStyle(fontSize: 14),
+                                  );
+                                },
+                              )
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextLbl().label(
+                                data: 'Kecamatan',
+                                textStyle:
+                                    const TextStyle(color: Colors.black54),
+                              ),
+                              const SizedBox(height: 3),
+                              Obx(
+                                () {
+                                  return TextLbl().label(
+                                    data: controller.districtText.value,
+                                    textStyle: const TextStyle(fontSize: 14),
+                                  );
+                                },
+                              )
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 30),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 2.h),
                     child: TextLbl().label(
                       data: 'Lokasi',
                       textStyle: const TextStyle(color: Colors.black54),
@@ -145,7 +202,10 @@ class DetailOrderView extends GetView<DetailOrderController> {
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 2.h),
                     child: TextLbl().label(
-                      data: '${controller.listOrder[0].alamat}',
+                      data: controller.listOrder[0].status ==
+                              'Menunggu Dokter Approval'
+                          ? '-'
+                          : '${controller.listOrder[0].alamat}',
                       textStyle: const TextStyle(fontSize: 14),
                     ),
                   ),
@@ -163,13 +223,11 @@ class DetailOrderView extends GetView<DetailOrderController> {
                 ),
               ),
             ),
-            ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              padding: EdgeInsets.only(bottom: 1.h),
-              itemCount: controller.listOrder[0].pasiens!.length,
-              itemBuilder: (context, patientIndex) {
-                final patient = controller.listOrder[0].pasiens![patientIndex];
+            Column(
+              children:
+                  controller.listOrder[0].pasiens!.asMap().entries.map((entry) {
+                int patientIndex = entry.key;
+                final patient = entry.value;
 
                 return Padding(
                   padding: patientIndex == controller.patientOrders.length - 1
@@ -194,7 +252,8 @@ class DetailOrderView extends GetView<DetailOrderController> {
                           SizedBox(height: 1.5.h),
                           desc(
                               label: 'Tanggal Lahir',
-                              desc: '${patient.tglLahir}'),
+                              desc: DateFormat("dd-MM-yyyy")
+                                  .format(DateTime.parse(patient.tglLahir!))),
                           SizedBox(height: 1.5.h),
                           desc(label: 'Gender', desc: '${patient.gender}'),
                           SizedBox(height: 1.5.h),
@@ -214,7 +273,12 @@ class DetailOrderView extends GetView<DetailOrderController> {
                     ),
                   ),
                 );
-              },
+              }).toList(),
+            ),
+            Container(
+              padding: EdgeInsets.all(2.h),
+              decoration: const BoxDecoration(color: HVColors.flashWhite),
+              child: backButton(),
             ),
           ],
         ),
@@ -222,7 +286,7 @@ class DetailOrderView extends GetView<DetailOrderController> {
     );
   }
 
-  Widget desc({required String label, required String desc}) {
+  desc({required String label, required String desc}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -244,7 +308,7 @@ class DetailOrderView extends GetView<DetailOrderController> {
     );
   }
 
-  Widget desc2({required String label, required String desc}) {
+  desc2({required String label, required String desc}) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,6 +329,27 @@ class DetailOrderView extends GetView<DetailOrderController> {
           ),
         )
       ],
+    );
+  }
+
+  backButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 54,
+      child: TextBtn().button(
+        onPressed: () {
+          if (controller.listOrder[0].status == 'Menunggu Dokter Approval') {
+            controller.getApprove();
+          } else {
+            Get.back();
+          }
+        },
+        backgroundColor: HVColors.primary,
+        textStyle: const TextStyle(color: Colors.white),
+        label: controller.listOrder[0].status == 'Menunggu Dokter Approval'
+            ? 'Terima Pesanan'
+            : 'Kembali',
+      ),
     );
   }
 }

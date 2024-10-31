@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -14,9 +15,11 @@ import '../../services/base_client.dart';
 import '/routes/route_name.dart' as utility;
 
 class OrderController extends GetxController with BaseController {
+  final Connectivity _connectivity = Connectivity();
   GetStorage box = GetStorage();
   String clientId = '3';
   String clientSecret = 'UuTlanKjhT7FKtig5RY2Cq2crJjYpVWqZNbQbiij';
+  var isOnline = false.obs;
   var isLoading = false.obs;
   var token = ''.obs;
   var uuid = ''.obs;
@@ -38,6 +41,7 @@ class OrderController extends GetxController with BaseController {
   final SearchableDropdownController<ObatModel> dropdownController =
       SearchableDropdownController<ObatModel>();
 
+  late TextEditingController diagnosaController;
   late TextEditingController searchTextController;
   late TextEditingController jumlahController;
   late TextEditingController aturanPakaiController;
@@ -48,6 +52,7 @@ class OrderController extends GetxController with BaseController {
   @override
   void onInit() {
     super.onInit();
+    diagnosaController = TextEditingController(text: '');
     searchTextController = TextEditingController(text: '');
     jumlahController = TextEditingController(text: '');
     aturanPakaiController = TextEditingController(text: '');
@@ -56,6 +61,10 @@ class OrderController extends GetxController with BaseController {
     fetchListOrder();
     fetchListPasien();
     // loadDiagnosisFromStorage();
+    _checkConnectivity();
+    _connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
+      _updateConnectionStatus(result);
+    });
   }
 
   @override
@@ -66,6 +75,24 @@ class OrderController extends GetxController with BaseController {
     keteranganController.dispose();
     focusNode.dispose();
     super.onClose();
+  }
+
+  Future<void> _checkConnectivity() async {
+    var result = await _connectivity.checkConnectivity();
+    _updateConnectionStatus(result);
+  }
+
+  void _updateConnectionStatus(ConnectivityResult result) {
+    isOnline.value = result != ConnectivityResult.none;
+    if (isOnline.value) {
+      fetchDiagnosisData();
+    }
+  }
+
+  void fetchDiagnosisData() {
+    // Panggil kembali data diagnosis atau refresh data dari server
+    // Contoh penggunaan:
+    getDiagnosis(0, ''); // Ganti 'patientIndex' dan pattern sesuai kebutuhan
   }
 
   void removeFocus() {
@@ -224,6 +251,7 @@ class OrderController extends GetxController with BaseController {
 
   // Function to show dropdown for a specific patient
   void showDropdown(int patientId) {
+    removeFocus();
     if (showDropdownForPatient[patientId] == null) {
       showDropdownForPatient[patientId] = false;
     }

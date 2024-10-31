@@ -8,10 +8,10 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../../controller/background_active_location.dart';
+import '../../controller/management_controller.dart';
 import '../../controller/notification_permission.dart';
 import '../../controller/permisson_controller.dart';
 import '../../helpers/dialog.dart';
-import '../../main.dart';
 import '../../model/doctor_model.dart';
 import '../../model/order_model.dart';
 import '../../services/api_services.dart';
@@ -19,10 +19,14 @@ import '../../services/base_client.dart';
 
 import '../../services/base_controller.dart';
 import '/routes/route_name.dart' as utility;
+import 'status_order_controller.dart';
 
 class ListOrderController extends GetxController
     with BaseController, WidgetsBindingObserver {
   GetStorage box = GetStorage();
+
+  OrderStatusController orderStatusController =
+      Get.put(OrderStatusController());
 
   var refreshKey = GlobalKey<RefreshIndicatorState>();
   var isLoading = false.obs;
@@ -40,6 +44,11 @@ class ListOrderController extends GetxController
     name: '',
     username: '',
     homeVisitStatus: 0,
+  ).obs;
+
+  var cekLocationOrder = LocationOrderModel(
+    cityText: '',
+    districtText: '',
   ).obs;
 
   @override
@@ -130,6 +139,31 @@ class ListOrderController extends GetxController
     }
   }
 
+  //cek location order
+  Future<LocationOrderModel?> getCekOrderLocation() async {
+    var response = await BaseClient().get(
+        ApiEndPoint.clinicUrl,
+        '${ApiEndPoint.authEndPoints.cekOrder}/${listOrder[0].uuid}',
+        {'Authorization': 'Bearer ${token.value}'}).catchError(handleError);
+    var data = json.decode(response);
+    var jsonStr = data['data'];
+    return LocationOrderModel.fromJson(jsonStr);
+  }
+
+// cek location order
+  Future<void> fetchOrderLocation() async {
+    var list = await getCekOrderLocation();
+    try {
+      if (list != null) {
+        cekLocationOrder.value = list;
+
+        // Handle the case where the list is null or empty
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
 // get order
   Future<List<OrderModel>?> getListOrder() async {
     var response = await BaseClient().get(
@@ -163,40 +197,22 @@ class ListOrderController extends GetxController
         listOrder.assignAll(list);
         uuid.value = '${listOrder[0].uuid}';
         statusOrder.value = '${listOrder[0].status}';
+        fetchOrderLocation();
+        orderStatusController.checkStatus();
         if (statusOrder.value == 'Perjalanan Dokter') {
           startBackgroundService();
-          return;
         } else if (statusOrder.value != 'Perjalanan Dokter') {
           stopBackgroundService();
-          return;
         }
+        return;
       } else {
         listOrder.clear();
+        stopBackgroundService();
         return;
         // Handle the case where the list is null or empty
       }
     } finally {
       isLoading.value = false;
-    }
-  }
-
-//sent status approve
-  Future<void> getApprove() async {
-    var response = await BaseClient().get(
-        ApiEndPoint.baseUrl,
-        '${ApiEndPoint.authEndPoints.approve}/${uuid.value}',
-        {'Authorization': 'Bearer ${token.value}'}).catchError(handleError);
-
-    json.decode(response);
-
-    if (response = true) {
-      onReload();
-      flutterLocalNotificationsPlugin.cancelAll();
-      Get.toNamed(utility.RouteName.detailOrder, arguments: {
-        'order_model': listOrder,
-      });
-    } else {
-      return;
     }
   }
 
@@ -210,7 +226,7 @@ class ListOrderController extends GetxController
     json.decode(response);
 
     if (response = true) {
-      onReload();
+      await onReload();
     } else {
       return;
     }
@@ -227,7 +243,7 @@ class ListOrderController extends GetxController
 
     if (response = true) {
       startBackgroundService();
-      onReload();
+      await onReload();
     } else {
       return;
     }
@@ -244,7 +260,7 @@ class ListOrderController extends GetxController
 
     if (response = true) {
       stopBackgroundService();
-      onReload();
+      await onReload();
     } else {
       return;
     }

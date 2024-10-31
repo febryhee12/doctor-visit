@@ -46,7 +46,7 @@ class SplashView extends GetView<SplashController> {
                   height: 2.5.h,
                 ),
                 TextLbl().label(
-                  data: 'Home Visit',
+                  data: 'Doctor Visit',
                   textStyle: TextStyle(
                     fontSize: 18.sp,
                   ),

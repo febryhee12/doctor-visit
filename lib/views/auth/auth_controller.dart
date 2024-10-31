@@ -46,14 +46,6 @@ class AuthController extends GetxController with BaseController {
         username.text.isNotEmpty && password.text.isNotEmpty;
   }
 
-  // void onTextChangedUsername(String value) {
-  //   isTextFieldUserEmpty.value = value.isEmpty;
-  // }
-
-  // void onTextChangedPassword(String value) {
-  //   isTextFieldPassEmpty.value = value.isEmpty;
-  // }
-
   Future<void> auth() async {
     DialogHelper2.showLoading();
     var response = await BaseClient()
@@ -64,6 +56,7 @@ class AuthController extends GetxController with BaseController {
 
     if (response == null) return;
     var data = await json.decode(response);
+    FocusManager.instance.primaryFocus?.unfocus();
     DialogHelper2.hideLoading();
     if (data['status'] == 'Success') {
       try {

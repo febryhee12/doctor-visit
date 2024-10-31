@@ -10,6 +10,7 @@ import 'package:sizer/sizer.dart';
 import '../../controller/google_maps.dart';
 import '../../styles/color.dart';
 import '/routes/route_name.dart' as utility;
+import 'status_order.dart';
 
 class ListOrderView extends GetView<ListOrderController> {
   const ListOrderView({super.key});
@@ -39,17 +40,20 @@ class ListOrderView extends GetView<ListOrderController> {
                 onRefresh: () async {
                   await controller.onReload();
                 },
-                child: ListView(
-                  shrinkWrap: true,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    SizedBox(
-                      height: 20.h,
-                    ),
-                    Center(
-                      child: placeholder(),
-                    ),
-                  ],
+                child: SizedBox(
+                  height: Layout.height,
+                  child: ListView(
+                    shrinkWrap: true,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(
+                        height: 20.h,
+                      ),
+                      Center(
+                        child: placeholder(),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }
@@ -155,31 +159,52 @@ class ListOrderView extends GetView<ListOrderController> {
             padding: const EdgeInsets.all(8.0),
             child: orderCard(),
           ),
-          SizedBox(
-            height: 3.h,
-          ),
-          Positioned(
-            bottom: 20,
-            left: 0,
-            right: 0,
-            child: Padding(
-              padding:
-                  EdgeInsets.all(2.0.h), // Mengatur padding sesuai kebutuhan
-              child: controller.statusOrder.value == 'Pemeriksaan Dokter'
-                  ? buttonVerification()
-                  : controller.statusOrder.value == 'Menunggu Dokter Approval'
-                      ? Container()
-                      : Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            controller.statusOrder.value == 'Perjalanan Dokter'
-                                ? buttonGetLoction()
-                                : Container(),
-                            buttonSlide(),
-                          ],
+          const SizedBox(height: 20),
+          controller.listOrder[0].status == 'Menunggu Dokter Approval'
+              ? Container()
+              : Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(15),
+                          topRight: Radius.circular(15),
+                        )),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 3.h,
                         ),
-            ),
-          ),
+                        OrderStatus(),
+                        SizedBox(
+                          height: 2.h,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(2.0.h),
+                          child: controller.statusOrder.value ==
+                                  'Pemeriksaan Dokter'
+                              ? buttonVerification()
+                              : controller.statusOrder.value ==
+                                      'Menunggu Dokter Approval'
+                                  ? Container()
+                                  : Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        controller.statusOrder.value ==
+                                                'Perjalanan Dokter'
+                                            ? buttonGetLoction()
+                                            : Container(),
+                                        buttonSlide(),
+                                      ],
+                                    ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
         ],
       ),
     );
@@ -232,20 +257,20 @@ class ListOrderView extends GetView<ListOrderController> {
                   textStyle: const TextStyle(color: Colors.white),
                   backgroundColor: HVColors.primary,
                   onPressed: () {
-                    controller.getApprove();
-                    if (controller.statusOrder.value ==
-                        'Menunggu Dokter Approval') {
-                      controller.getApprove();
-                    } else {
-                      Get.toNamed(utility.RouteName.detailOrder, arguments: {
-                        'order_model': controller.listOrder,
-                      });
-                    }
+                    // controller.getApprove();
+                    // if (controller.statusOrder.value ==
+                    //     'Menunggu Dokter Approval') {
+                    //   controller.getApprove();
+                    // } else {
+                    Get.toNamed(utility.RouteName.detailOrder, arguments: {
+                      'order_model': controller.listOrder,
+                      'city': controller.cekLocationOrder.value.cityText,
+                      'district':
+                          controller.cekLocationOrder.value.districtText,
+                    });
+                    // }
                   },
-                  label:
-                      controller.statusOrder.value == 'Menunggu Dokter Approval'
-                          ? 'Terima Pesanan'
-                          : 'Detail Pesanan'),
+                  label: 'Detail Pesanan'),
             ),
           ],
         ),

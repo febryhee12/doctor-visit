@@ -208,10 +208,10 @@ class Pasiens {
     memberId = json['member_id'];
     nama = json['nama'];
     tglLahir = json['tgl_lahir'];
-    gender = json['gender'] == 'M'
-        ? 'Pria'
-        : json['gender'] == 'F'
-            ? 'Wanita'
+    gender = json['gender'] == 'L'
+        ? 'Laki-laki'
+        : json['gender'] == 'P'
+            ? 'Perempuan'
             : json['gender'];
     email = json['email'];
     phone = json['phone'];
@@ -332,6 +332,30 @@ class ImageModel {
       'image': image,
       'created_at': createdAt,
       'updated_at': updatedAt,
+    };
+  }
+}
+
+class LocationOrderModel {
+  String? cityText;
+  String? districtText;
+
+  LocationOrderModel({
+    this.cityText,
+    this.districtText,
+  });
+
+  factory LocationOrderModel.fromJson(Map<String, dynamic> json) {
+    return LocationOrderModel(
+      cityText: json['city_text'],
+      districtText: json['district_text'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'city_text': cityText,
+      'district_text': districtText,
     };
   }
 }

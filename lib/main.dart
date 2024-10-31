@@ -56,12 +56,12 @@ void main() async {
       // Skip showing notification
       flutterLocalNotificationsPlugin.cancelAll();
       listOrderController.listOrder.clear();
-      listOrderController.fetchListOrder();
+      listOrderController.onReload();
     } else {
       // Show notification
       if (message.notification != null) {
         showNotification(message);
-        listOrderController.fetchListOrder();
+        listOrderController.onReload();
       }
     }
   });

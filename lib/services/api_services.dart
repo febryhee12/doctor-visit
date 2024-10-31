@@ -1,9 +1,11 @@
 class ApiEndPoint {
   static const String baseUrl =
       'https://staging.isoclinic.co.id/api/homevisit/dokter/'; //staging
+  // 'https://isoclinic.co.id/api/homevisit/dokter/'; //live
   // ignore: library_private_types_in_public_api
   static const String clinicUrl =
-      'https://staging.isoclinic.co.id/api/homevisit/';
+      'https://staging.isoclinic.co.id/api/homevisit/'; //staging
+  // 'https://isoclinic.co.id/api/homevisit/'; //live
   static const String ariMedicine = 'https://app.vivamedika.co.id/api/ari/';
   // ignore: library_private_types_in_public_api
   static _AuthEndPoints authEndPoints = _AuthEndPoints();
@@ -22,6 +24,7 @@ class _AuthEndPoints {
   final String uploadDocument = 'kirim_foto';
   final String currentLocation = 'lokasi_terbaru';
   final String storeToken = 'store_token';
+  final String cekOrder = 'order';
 
   final String listMedicine = 'list-medicine';
 }

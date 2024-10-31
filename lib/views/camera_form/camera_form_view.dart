@@ -127,18 +127,22 @@ class CameraFormView extends GetView<CameraFormController> {
   }
 
   Widget _buildImagePreview(File imageFile, int index) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: GestureDetector(
-        onTap: () => controller.pickImageFromCamera(index),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            constraints: const BoxConstraints(
-              maxHeight: 200,
-              minWidth: 360,
+    return SizedBox(
+      height: 200,
+      width: 360,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: GestureDetector(
+          onTap: () => controller.pickImageFromCamera(index),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              constraints: const BoxConstraints(
+                maxHeight: 200,
+                minWidth: 360,
+              ),
+              child: Image.file(imageFile, fit: BoxFit.cover),
             ),
-            child: Image.file(imageFile, fit: BoxFit.cover),
           ),
         ),
       ),

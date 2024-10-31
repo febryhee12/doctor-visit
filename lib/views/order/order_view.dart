@@ -6,6 +6,7 @@ import 'package:home_visit/model/diagnosis_model.dart';
 import 'package:home_visit/styles/color.dart';
 import 'package:home_visit/views/order/order_controller.dart';
 import 'package:home_visit/widgets/text_lbl.dart';
+import 'package:intl/intl.dart';
 import 'package:searchable_paginated_dropdown/searchable_paginated_dropdown.dart';
 import 'package:sizer/sizer.dart';
 import '../../model/obat_model.dart';
@@ -222,16 +223,18 @@ class OrderView extends GetView<OrderController> {
                                 return Container(
                                   margin: const EdgeInsets.only(bottom: 10),
                                   decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                          width: 1, color: HVColors.greybg)),
+                                    color: HVColors.whisper,
+                                    borderRadius: BorderRadius.circular(12),
+                                    // border: Border.all(
+                                    //     width: 1, color: HVColors.greybg)
+                                  ),
                                   child: ListTile(
                                     title: Text(
                                       medicine.obat!.name!,
                                       style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15,
-                                          color: HVColors.primary),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
                                     ),
                                     subtitle: Column(
                                       crossAxisAlignment:
@@ -304,7 +307,13 @@ class OrderView extends GetView<OrderController> {
               keyboardType: TextInputType.text,
             );
           },
+          focusNode: controller.focusNode,
+          controller: controller.diagnosaController,
+          direction: VerticalDirection.down,
           suggestionsCallback: (pattern) async {
+            if (!controller.isOnline.value) {
+              return [];
+            }
             if (pattern.isEmpty) {
               return [];
             }
@@ -323,12 +332,12 @@ class OrderView extends GetView<OrderController> {
             return ListTile(title: Text(suggestion.nmDiag!));
           },
           onSelected: (DiagnosisTagModel selectedTag) {
-            FocusScope.of(context).unfocus();
+            controller.removeFocus();
             controller.addTag(patientIndex, selectedTag);
-
-            Future.delayed(const Duration(milliseconds: 100), () {
-              FocusScope.of(context).requestFocus(FocusNode());
-            });
+            controller.diagnosaController.clear();
+            // Future.delayed(const Duration(milliseconds: 100), () {
+            //   FocusScope.of(context).requestFocus(FocusNode());
+            // });
           },
           emptyBuilder: (context) => const ListTile(
             title: Text('Data tidak ditemukan'),
@@ -342,14 +351,44 @@ class OrderView extends GetView<OrderController> {
             children: controller.selectedDiagnosisMap[
                         controller.patientOrders[patientIndex].id]
                     ?.map((tag) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: Chip(
-                      label: Text(tag.nmDiag!),
-                      onDeleted: () {
-                        controller.removeTag(
-                            controller.patientOrders[patientIndex].id!, tag);
-                      },
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 7.0),
+                    decoration: BoxDecoration(
+                      color: HVColors.whisper,
+                      borderRadius: BorderRadius.circular(
+                          100), // Radius untuk membuat sudut melengkung seperti Chip
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 4), // Padding dalam "Chip"
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            tag.nmDiag!,
+                            style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight:
+                                    FontWeight.bold), // Sesuaikan ukuran font
+                            maxLines: 5, // Membatasi ke 2 baris
+                            overflow: TextOverflow
+                                .visible, // Izinkan teks melanjutkan ke baris kedua
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.cancel,
+                            size: 20,
+                            color: HVColors.alzarin,
+                          ), // Ikon delete
+                          onPressed: () {
+                            controller.removeTag(
+                              controller.patientOrders[patientIndex].id!,
+                              tag,
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   );
                 }).toList() ??
@@ -513,7 +552,12 @@ class OrderView extends GetView<OrderController> {
                       label: 'Nama Pasien',
                       desc: '${patien.nama}'.toUpperCase()),
                   SizedBox(height: 1.5.h),
-                  desc(label: 'Tanggal Lahir', desc: '${patien.tglLahir}'),
+                  desc(
+                    label: 'Tanggal Lahir',
+                    desc: DateFormat("dd-MM-yyyy").format(
+                      DateTime.parse('${patien.tglLahir}'),
+                    ),
+                  ),
                   SizedBox(height: 1.5.h),
                   desc(label: 'Gender', desc: '${patien.gender}'),
                   SizedBox(height: 1.5.h),
